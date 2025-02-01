@@ -2,7 +2,7 @@
   "expo": {
     "name": "Al-Quran (Bangla Audio)",
     "slug": "al-quran",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "dark",
@@ -39,10 +39,10 @@
       }
     },
     "android": {
-      "versionCode": 1,
+      "versionCode": 3,
       "package": "com.flexlab.alquran",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-icon.png",
+        "foregroundImage": "./assets/splash-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

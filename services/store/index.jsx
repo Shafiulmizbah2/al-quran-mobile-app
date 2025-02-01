@@ -51,7 +51,7 @@ export const StoreProvider = ({ children }) => {
         })
 
         await FileSystem.makeDirectoryAsync(ASSET_FOLDER, { intermediates: true });
-        const rawResponse = await fetch('http://quran.flexlab.studio')
+        const rawResponse = await fetch('https://quran.flexlab.studio')
         const response = await rawResponse.json()
 
         for (const asset of response.data) {
@@ -66,7 +66,6 @@ export const StoreProvider = ({ children }) => {
                     state: true,
                     progress: asset,
                 })
-                console.log('Downloading asset', asset.id);
                 await FileSystem.downloadAsync(asset.audio, audioPath);
                 await FileSystem.downloadAsync(asset.artwork, thumbnailPath);
             }
