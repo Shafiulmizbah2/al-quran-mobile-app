@@ -8,11 +8,7 @@ export default function Play( props ) {
 
     return (
         <View style={[isActive ? styles.active : styles.inActive, styles.btn, style]}>
-            { isActive ? (
-                <Ionicons name="pause-outline" size={18} color="white" />
-            ) : (
-                <FontAwesome5 name="play" size={14} color="#959595" />
-            ) }
+            <FontAwesome5 name="play" size={14} color={isActive ? 'white' : `#959595`} />
         </View>
     )
 }

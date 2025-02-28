@@ -15,7 +15,7 @@ const Stack = createNativeStackNavigator();
 
 const TabNavigation = () => {
   return (
-    <Tab.Navigator tabBar={TabBar}>
+    <Tab.Navigator tabBar={(props) => <TabBar {...props}/>}>
       <Tab.Screen name="Home" component={HomeScreen} options={{
         headerShown: false,
       }}/>

@@ -14,9 +14,9 @@ export default function PlayButton( props ) {
         >
             <View style={styles.container}>
                 { isActive ? (
-                    <Ionicons name="pause-outline" size={28} color={color} />
-                ) : (
                     <FontAwesome5 name="play" size={22} color={color} />
+                ) : (
+                    <Ionicons name="pause-outline" size={28} color={color} />
                 ) }
             </View>
         </Pressable>

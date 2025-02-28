@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useCallback, useMemo } from "react"
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import { getRandomTrackId, getNextTrackId, getPreviousTrackId } from "@/helpers/utils";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import * as FileSystem from 'expo-file-system';
 
 
@@ -48,6 +49,10 @@ export const StoreProvider = ({ children }) => {
     const fetchRemoteData = async () => {
         setDownloading({
             state: true,
+            progress: {
+                id: 0,
+                title: 'Finding...',
+            },
         })
 
         await FileSystem.makeDirectoryAsync(ASSET_FOLDER, { intermediates: true });
@@ -100,7 +105,9 @@ export const StoreProvider = ({ children }) => {
         const audioMeta = JSON.parse(audioRawMeta)
 
         if (!audioMeta || (audioMeta || []).length !== 114) {
-            await fetchRemoteData()
+            setDownloading({
+                state: true,
+            })
         }
 
         await prepareAudio()
@@ -239,6 +246,11 @@ export const StoreProvider = ({ children }) => {
      */ 
     const setSound = async (trackId) => {
 
+        setSearch({
+            query: '',
+            isFocused: false,
+        });
+
         if( !trackId ) return;
         if( sound.id === trackId ) return;
         if( player.isBuffering ) return;
@@ -308,6 +320,7 @@ export const StoreProvider = ({ children }) => {
         <StoreContext.Provider value={{
             data,
             downloading,
+            fetchRemoteData,
             player,
             recentTracks,
             currentAudio,

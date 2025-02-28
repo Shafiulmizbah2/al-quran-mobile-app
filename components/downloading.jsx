@@ -1,13 +1,23 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import { useContext } from 'react';
 import { StoreContext } from '@/services/store';
 import PageWrapper from './page-wrapper';
 import { convertMilliseconds } from 'helpers/utils';
 
 export default function Downloading() {
-    const { downloading } = useContext(StoreContext);
+    const { downloading, fetchRemoteData } = useContext(StoreContext);
 
-    if( !downloading.progress ) return null;
+    if( !downloading.progress ) return (
+        <PageWrapper style={{ backgroundColor: '#0c0c0c', flex: 1, justifyContent: 'center' }}>
+            <View style={{ paddingHorizontal: 10, maxWidth: 400, marginHorizontal: 'auto' }}>
+                <Text style={[styles.heading, {marginBottom: 20}]}>Thank you for installing our app! To enjoy <Text style={{color: '#42C83C'}}>seamless offline playback of Surahs</Text>, please download the media files first.</Text>
+                <Text style={styles.title}>The media files include both the audio and a thumbnail image for each Surah.</Text>
+                <Pressable style={{ marginTop: 32, padding: 14, backgroundColor: '#42C83C', borderRadius: 50, width: 250, marginHorizontal: 'auto' }} onPress={fetchRemoteData}>
+                    <Text style={{ color: '#FFF', textAlign: 'center', fontSize: 16 }}>Download Now</Text>
+                </Pressable>
+            </View>
+        </PageWrapper>
+    );
 
     return (
         <PageWrapper style={{ backgroundColor: '#0c0c0c' }}>
@@ -46,12 +56,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 40,
         color: '#DFDFDF',
+        lineHeight: 30,
     },
     title: {
         fontSize: 18,
         textAlign: 'center',
         color: '#DFDFDF',
         fontWeight: 700,
+        lineHeight: 28
     },
     artwork: {
         width: 270,
