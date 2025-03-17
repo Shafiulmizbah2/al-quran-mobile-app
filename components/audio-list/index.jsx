@@ -18,6 +18,7 @@ import { convertMilliseconds } from "helpers/utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import colors from "constants/colors";
 import * as FileSystem from "expo-file-system";
+import CircularProgress from "react-native-circular-progress-indicator";
 
 const ASSET_FOLDER = FileSystem.documentDirectory + "audio/";
 
@@ -40,6 +41,8 @@ export default function AudioList(props) {
     downloadingItem,
     downloadingAll,
     setDownloadingItem,
+    downloadProgress,
+    setDownloadProgress,
   } = useContext(StoreContext);
   const [downloadedTracks, setDownloadedTracks] = useState([]);
 
@@ -89,8 +92,7 @@ export default function AudioList(props) {
 
   const isLastIndex = (index) => index === filteredData.length - 1;
   const isCurrentTrack = (id) => sound.id === id && player.isPlaying;
-  const isDownloaded = (id) => downloadedTracks.includes(id);
-  const isDownloading = (id) => downloadingItem === id;
+  const isDownloading = (id) => downloadingItem[id]?.isDownloading || false;
   const isAllDownloaded = !data.some(
     (track) => track.audio.startsWith("http") || track.audio.startsWith("https")
   );
@@ -145,7 +147,16 @@ export default function AudioList(props) {
               </Pressable>
 
               {isDownloading(item.id) ? (
-                <ActivityIndicator size="small" color={colors.primary} />
+                <CircularProgress
+                  value={downloadProgress[item.id] || 0}
+                  inActiveStrokeColor={colors.primary}
+                  inActiveStrokeOpacity={0.2}
+                  progressValueColor={"#fff"}
+                  valueSuffix={"%"}
+                  radius={15}
+                  inActiveStrokeWidth={4}
+                  activeStrokeWidth={4}
+                />
               ) : item?.downloaded ? (
                 <Pressable onPress={() => toggleFavorite(item.id)}>
                   <Heart
@@ -157,9 +168,23 @@ export default function AudioList(props) {
               ) : (
                 <Pressable
                   onPress={async () => {
-                    setDownloadingItem(item.id);
+                    setDownloadingItem((prev) => ({
+                      ...prev,
+                      [item.id]: { isDownloading: true, audio: item },
+                    }));
+                    setDownloadProgress((prevProgress) => ({
+                      ...prevProgress,
+                      [item.id]: 0,
+                    }));
                     await downloadAudio(item);
-                    setDownloadingItem(null);
+                    setDownloadingItem((prev) => ({
+                      ...prev,
+                      [item.id]: { isDownloading: false, audio: item },
+                    }));
+                    setDownloadProgress((prevProgress) => ({
+                      ...prevProgress,
+                      [item.id]: 0,
+                    }));
                   }}
                 >
                   <AntDesign name="download" size={24} color={colors.primary} />

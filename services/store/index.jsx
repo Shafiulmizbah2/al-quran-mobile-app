@@ -46,8 +46,9 @@ export const StoreProvider = ({ children }) => {
   });
   const [currentTime, setCurrentTime] = useState(0);
   const [favorite, _setFavorite] = useState([]);
-  const [downloadingItem, setDownloadingItem] = useState(null);
+  const [downloadingItem, setDownloadingItem] = useState({});
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({});
   const [_recent, _setRecent] = useState([]);
   const [search, setSearch] = useState({
     query: "",
@@ -79,13 +80,36 @@ export const StoreProvider = ({ children }) => {
     try {
       const audioPath = ASSET_FOLDER + audio.id + ".mp3";
       const fileInfo = await FileSystem.getInfoAsync(audioPath);
+      const thumbnailPath = ASSET_FOLDER + audio.id + ".png";
+      const thumbnailInfo = await FileSystem.getInfoAsync(thumbnailPath);
 
-      if (!fileInfo.exists) {
+      if (!fileInfo.exists || !thumbnailInfo.exists) {
         const audioUrl = audio.audio;
         await FileSystem.makeDirectoryAsync(ASSET_FOLDER, {
           intermediates: true,
         });
-        await FileSystem.downloadAsync(audioUrl, audioPath);
+        // await FileSystem.downloadAsync(audioUrl, audioPath);
+        const callback = (downloadProgress) => {
+          const progress =
+            (downloadProgress.totalBytesWritten /
+              downloadProgress.totalBytesExpectedToWrite) *
+            100;
+
+          setDownloadProgress((prevProgress) => ({
+            ...prevProgress,
+            [audio.id]: progress, // Set the progress individually for this audio
+          }));
+        };
+
+        const downloadResumable = FileSystem.createDownloadResumable(
+          audioUrl,
+          audioPath,
+          {},
+          callback
+        );
+
+        await downloadResumable.downloadAsync();
+        await FileSystem.downloadAsync(audio.artwork, thumbnailPath);
 
         const storedTracks = await AsyncStorage.getItem("audio_meta");
         const tracks = storedTracks ? JSON.parse(storedTracks) : [];
@@ -108,7 +132,15 @@ export const StoreProvider = ({ children }) => {
     } catch (error) {
       console.error("Error downloading audio:", error);
     } finally {
-      setDownloadingItem(null);
+      setDownloadingItem((prev) => ({
+        ...prev,
+        [audio.id]: { isDownloading: false, audio },
+      }));
+
+      setDownloadProgress((prevProgress) => ({
+        ...prevProgress,
+        [audio.id]: 0, // Reset the progress for this audio item after download is complete
+      }));
     }
   };
 
@@ -120,13 +152,17 @@ export const StoreProvider = ({ children }) => {
 
       const audioList = JSON.parse(storedTracks);
       for (const audio of audioList) {
-        setDownloadingItem(audio.id);
+        setDownloadingItem((prev) => ({
+          ...prev,
+          [audio.id]: { isDownloading: true, audio },
+        }));
+
         await downloadAudio(audio);
       }
     } catch (error) {
       console.error("Error downloading all audios:", error);
     }
-    setDownloadingItem(null);
+    setDownloadingItem({});
     setDownloadingAll(false);
   };
 
@@ -387,6 +423,8 @@ export const StoreProvider = ({ children }) => {
         downloadAllAudios,
         downloadingItem,
         downloadingAll,
+        downloadProgress,
+        setDownloadProgress,
         setDownloadingItem,
         player,
         recentTracks,
