@@ -6,8 +6,9 @@ import { StoreContext } from "@/services/store";
 import colors from "@/constants/colors.js";
 import AntDesign from "@expo/vector-icons/AntDesign";
 
-export default function HomeScreen() {
+export default function HomeScreen({ route }) {
   const { search } = useContext(StoreContext);
+  const currentScreen = route.name;
 
   const renderItem = ({ item }) => {
     switch (item.key) {
@@ -22,7 +23,7 @@ export default function HomeScreen() {
       case audioList.key:
         return (
           <View style={styles.section}>
-            <item.component title="All Surah" />
+            <item.component title="All Surah" screenName={currentScreen} />
           </View>
         );
       default:

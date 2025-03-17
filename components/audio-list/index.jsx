@@ -1,5 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, Dimensions, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  Dimensions,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { heading } from "constants/styles";
@@ -16,7 +23,7 @@ const ASSET_FOLDER = FileSystem.documentDirectory + "audio/";
 
 export default function AudioList(props) {
   const navigation = useNavigation();
-  const { title, isFavoriteOnly } = props;
+  const { title, isFavoriteOnly, screenName } = props;
   const {
     data,
     isFavoriteById,
@@ -84,6 +91,11 @@ export default function AudioList(props) {
   const isCurrentTrack = (id) => sound.id === id && player.isPlaying;
   const isDownloaded = (id) => downloadedTracks.includes(id);
   const isDownloading = (id) => downloadingItem === id;
+  const isAllDownloaded = !data.some(
+    (track) => track.audio.startsWith("http") || track.audio.startsWith("https")
+  );
+
+  const showDownloadALlBtn = screenName === "Home" && !isAllDownloaded;
 
   return (
     <View style={styles.wrapper}>
@@ -92,11 +104,13 @@ export default function AudioList(props) {
           {search.isFocused ? "Search result" : title}
         </Text>
         {downloadingAll ? (
-          <AntDesign name="loading1" size={24} color={colors.primary} />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <Pressable onPress={downloadAllAudios}>
-            <Text style={styles.download_all}>Download all</Text>
-          </Pressable>
+          showDownloadALlBtn && (
+            <Pressable onPress={downloadAllAudios}>
+              <Text style={styles.download_all}>Download all</Text>
+            </Pressable>
+          )
         )}
       </View>
 
@@ -129,11 +143,16 @@ export default function AudioList(props) {
                   </View>
                 </View>
               </Pressable>
+
               {isDownloading(item.id) ? (
-                <AntDesign name="loading1" size={24} color={colors.primary} />
+                <ActivityIndicator size="small" color={colors.primary} />
               ) : item?.downloaded ? (
                 <Pressable onPress={() => toggleFavorite(item.id)}>
-                  <Heart isActive={isFavoriteById(item.id)} isFill={true} />
+                  <Heart
+                    size={24}
+                    isActive={isFavoriteById(item.id)}
+                    isFill={true}
+                  />
                 </Pressable>
               ) : (
                 <Pressable
